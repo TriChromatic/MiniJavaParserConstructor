@@ -48,8 +48,10 @@ public class ParserGenerator {
 
             /*Generate ifs, later statements add modifiers*/
             if ( !findSyntax( token ) ) {
+                /*Reset x and c, set indexes*/
                 charReset();
-                ifStartIndex = code.length(); //Stores where the last if statement began
+                ifStartIndex = code.length();
+                tokenIndex = ifStartIndex;
 
                 /*Construct if char at statements*/
                 if ( isEq( eq ) ) {
