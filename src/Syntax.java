@@ -1,4 +1,5 @@
 /**
+ * Syntax enum. For easy syntax additions and check code.
  * Created by TriChromatic aka Dylan Eicher on 11/18/14.
  */
 public enum Syntax {
