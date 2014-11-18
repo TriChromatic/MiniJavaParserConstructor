@@ -9,7 +9,7 @@ import java.nio.file.Paths;
  * Created by TriChromatic aka Dylan Eicher on 11/17/14.
  */
 public class ParseHandler {
-    //Everything set to private and final as preferred
+    /*DMV Private and final*/
     private final String DELIMS;
     private final File OUT_FILE;
     private final boolean REMOVE;
