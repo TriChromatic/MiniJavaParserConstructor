@@ -27,26 +27,28 @@ public class JPG {
 
         //Variables for arguments
         boolean returnDelims = false;
-        boolean usingFile = false;
-        boolean outputToFile = false;
+        boolean usingFile = false; //If where using an input file
+        boolean outputToFile = false; //If where using an output file
         String delimiters = null;
         File delimFile = null;
         File outputFile = null;
 
         //Parse arguments
         for ( int i = 0; i < args.length; i++ ) {
-            if ( args[i].equalsIgnoreCase( "-r" ) ) { //If we also return found delimiters
+            if ( args[i].equalsIgnoreCase( "-r" ) ) {
                 returnDelims = true;
-            } else if ( args[i].equalsIgnoreCase( "-f" ) ) { //Delim file / validity check
+            } else if ( args[i].equalsIgnoreCase( "-f" ) ) {
                 delimFile = new File( args[i + 1] );
                 if ( !delimFile.exists() || !delimFile.canRead() ) {
                     System.out.println( "Cannot read in delimiter file... Exiting." );
                     return;
                 }
                 usingFile = true;
-            } else if ( args[i].equalsIgnoreCase( "-d" ) ) { //Get delimiters
+            } else if ( args[i].equalsIgnoreCase( "-d" ) ) {
                 delimiters = args[i + 1];
-            } else if ( args[i].equalsIgnoreCase( "-o" ) ) { //Output file / validity check
+            } else if ( args[i].equalsIgnoreCase( "-o" ) ) {
+                /*Checks output file and stops program if its not valid*/
+
                 outputFile = new File( args[i + 1] );
                 if ( !outputFile.exists() || !outputFile.canWrite() ) {
                     System.out.println( "Output file does not exist or cannot be written to... Exiting." );
@@ -56,21 +58,25 @@ public class JPG {
             }
         }
 
-        /*Sets up the handler and parses everything*/
+        /*Sets up the handler and parses everything. If there is no output file we just display the code*/
         if ( usingFile ) {
-            ParseHandler parseGen = new ParseHandler( delimFile, outputFile, returnDelims );
             if ( outputToFile ) {
+                ParseHandler parseGen = new ParseHandler( delimFile, outputFile, returnDelims );
                 parseGen.writeCode();
             } else {
+                ParseHandler parseGen = new ParseHandler( delimFile, returnDelims );
                 parseGen.displayCode();
             }
         } else {
-            ParseHandler parseGen = new ParseHandler( delimiters, outputFile, returnDelims );
             if ( outputToFile ) {
+                ParseHandler parseGen = new ParseHandler( delimiters, outputFile, returnDelims );
                 parseGen.writeCode();
             } else {
+                ParseHandler parseGen = new ParseHandler( delimiters, returnDelims );
                 parseGen.displayCode();
             }
         }
+
+        System.out.println( "Generation success!" );
     }
 }
