@@ -5,8 +5,10 @@ import java.util.List;
  * Created by TriChromatic aka Dylan Eicher on 11/17/14.
  */
 public class ParserGenerator {
+    /*GEN_CODE aka Generated Code*/
     private final String GEN_CODE;
-    private final StringBuilder code;
+    /*C is for code*/
+    private final StringBuilder C;
 
     /**
      * Generates code from tokens created by delimiter parser
@@ -18,109 +20,121 @@ public class ParserGenerator {
      * @param removeNull true if adding code to remove null tokens
      */
     ParserGenerator( List<String> tokens, boolean removeNull ) {
-        /*Create stringbuilder with proper starting things*/
-        code = new StringBuilder( String.format( "List<String> parseText(String text) {\n" +
-                "%sList<String> tokens = new ArrayList<String>();\n" +
-                "%sint index = 0;\n%sfor(int i = 0; i < text.length(); i++) {\n"
-                , ta( 1 ), ta( 1 ), ta( 1 ) ) );
+        /*Create StringBuilder with proper starting things and store tokens*/
+        C = new StringBuilder( StoredText.INITIALFOR.txt() );
 
         /*Helper var declaration*/
         String eq = "=="; //Switches between != and ==, Defaults to ==
         String ao = "||"; //Switches between && and ||, Defaults to ||
-        int tokenIndex = code.length(); //Beginning index where token stuff should start
-        int ifStartIndex = code.length(); //Because index where the last if run was conducted
+        int tokenIndex = C.length(); //Beginning index where token stuff should start
+        int ifStartIndex = C.length(); //Because index where the last if run was conducted
 
-        /*Code generation starts here. Loops through tokens*/
         for ( int i = 0; i < tokens.size(); i++ ) {
             /*Safe token finding. Token is declared final for safety*/
             final String token = tokens.get( i );
+            final char startC = token.charAt( 0 );
 
             /*Forward token must only be non syntax related*/
             String forwardToken = "";
             if ( i < tokens.size() - 1 ) {
                 for ( int x = i + 1; x < tokens.size(); x++ ) {
                     forwardToken = tokens.get( x );
-                    if ( !findSyntax( forwardToken ) ) {
+                    if ( !isSyntax( forwardToken ) ) {
                         break;
                     }
                 }
             }
 
             /*Generate ifs, later statements add modifiers*/
-            if ( !findSyntax( token ) ) {
+            if ( !isSyntax( token ) ) {
+
                 /*Reset x and c, set indexes*/
-                charReset();
-                ifStartIndex = code.length();
+                appendResetCode();
+                ifStartIndex = C.length();
                 tokenIndex = ifStartIndex;
 
                 /*Construct if char at statements*/
                 if ( isEq( eq ) ) {
-                    code.append( String.format( "%sswitch(c){\n", ta( 2 ) ) );
+                    C.append( "switch(c){\n" );
                     for ( int j = 0; j < token.length(); j++ ) {
-                        code.append( String.format( "%scase '%s':\n", ta( 3 ), token.charAt( j ) ) );
-                        code.append( String.format( "%stokens.add(text.substring(index, x));\n", ta( 4 ) ) );
-                        code.append( String.format( "%sindex = x + 1;\n", ta( 4 ) ) );
-                        code.append( String.format( "%sbreak;\n", ta( 4 ) ) );
+                        C.append( String.format( "case '%s':\n", token.charAt( j ) ) );
+                        C.append( "tokens.add(text.substring(index, x));\n" );
+                        C.append( ( "index = x + 1;\n" ) );
+                        C.append( "break;\n" );
                     }
                 } else {
+
                     /*If we use a ^ this is what we do use the not eq and and*/
-                    code.append( String.format( "%sif(c!='%s'", ta( 2 ), token.charAt( 0 ) ) );
+                    C.append( String.format( "if(c!='%s'", token.charAt( 0 ) ) );
                     if ( token.length() > 1 ) {
                         for ( int j = 1; j < token.length(); j++ ) {
-                            code.append( String.format( "%sc!='%s'", ao, token.charAt( j ) ) );
+                            C.append( String.format( "%sc!='%s'", ao, token.charAt( j ) ) );
                         }
                     }
-                    code.append( "){\n" ).append( ta( 3 ) );
-                    code.append( "tokens.add(text.substring(index, x));\n" ).append( ta( 3 ) );
-                    code.append( "index = x + 1;\n" ).append( ta( 2 ) ).append( "}\n" );
+                    C.append( "){\n" );
+                    C.append( "tokens.add(text.substring(index, x));\n" );
+                    C.append( "index = x + 1;\n" );
+                    C.append( "}\n" );
                 }
 
-                eq = "=="; //Reset equals
-            } else if ( token.charAt( 0 ) == Syntax.END.getType() ) {
+                eq = "==";
+                ao = "||";
+
+            } else if ( startC == Syntax.END.getC() && isSyntax( token ) ) {
+
                 /*Account for ending notation*/
-                code.insert( tokenIndex, String.format( "%sx = text.length() - 1;\n%sc = text.charAt(x);\n", ta( 2 ), ta( 2 ) ) );
-                tokenIndex = code.length();
-            } else if ( token.charAt( 0 ) == Syntax.START.getType() ) {
+                C.insert( tokenIndex, "x = text.length() - 1;\nc = text.charAt(x);\n" );
+                C.insert( tokenIndex, "index = text.length() - 2;\n" );
+                tokenIndex = C.length();
+
+            } else if ( startC == Syntax.START.getC() && isSyntax( token ) ) {
+
                 /*Account for starting notation*/
-                code.insert( tokenIndex, String.format( "%sx = 0;\n%sc = text.charAt(x);\n", ta( 2 ), ta( 2 ) ) );
-                tokenIndex = code.length();
-            } else if ( token.charAt( 0 ) == Syntax.BIND.getType() ) {
+                C.insert( tokenIndex, ( "x = 0;\nc = text.charAt(x);\n" ) );
+                tokenIndex = C.length();
+
+            } else if ( startC == Syntax.BIND.getC() && isSyntax( token ) ) {
+
                 /*Injects if statements into proper index*/
-                int tempLength = code.length();
-                code.insert( ifStartIndex, String.format( "%sif(c%s'%s'", ta( 2 ), eq, forwardToken.charAt( 0 ) ) );
-                int tempIndex = ifStartIndex + ( code.length() - tempLength );
+                int tempLength = C.length();
+                C.insert( ifStartIndex, String.format( "if(c%s'%s'", eq, forwardToken.charAt( 0 ) ) );
+                int tempIndex = ifStartIndex + ( C.length() - tempLength );
 
                 /*Use forward token and insert the statement into the correct position*/
                 for ( int j = 1; j < forwardToken.length(); j++ ) {
-                    tempLength = code.length();
-                    code.insert( tempIndex, String.format( " %s c%s'%s'", ao, eq, forwardToken.charAt( j ) ) );
-                    tempIndex = tempIndex + ( code.length() - tempLength );
+                    tempLength = C.length();
+                    C.insert( tempIndex, String.format( " %s c%s'%s'", ao, eq, forwardToken.charAt( j ) ) );
+                    tempIndex = tempIndex + ( C.length() - tempLength );
                 }
 
                 /*Insert new x specification to look behind*/
-                code.insert( tempIndex, String.format( "){\n%sx = x - 1;\n%sc = text.charAt(x);\n", ta( 2 ), ta( 2 ) ) );
-                code.append( String.format( "%s}\n", ta( 2 ) ) );
+                C.insert( tempIndex, ( "){\nx = x - 1;\nc = text.charAt(x);\n" ) );
+                C.append( ( "}\n" ) );
                 tokens.remove( forwardToken );
-            } else if ( token.charAt( 0 ) == Syntax.NOT.getType() ) {
+
+            } else if ( startC == Syntax.NOT.getC() && isSyntax( token ) ) {
                 eq = "!=";
-            } else if ( token.charAt( 0 ) == Syntax.AND.getType() ) {
+
+            } else if ( startC == Syntax.AND.getC() && isSyntax( token ) ) {
                 ao = "&&";
+
             }
         }
 
         /*Ending braces and other*/
         if ( removeNull ) {
-            addCleanerCode();
+            appendCleanerCode();
         } else {
-            code.append( "}\nreturn tokens;\n}" );
+            C.append( "}\n}\nreturn tokens;\n}" );
         }
 
-        GEN_CODE = code.toString();
+        /*Clean up code and convert to String*/
+        GEN_CODE = reformatCode( C ).toString();
     }
 
 
     /**
-     * @return generated code
+     * @return generated C
      */
     public String getGeneratedCode() {
         return GEN_CODE;
@@ -132,10 +146,10 @@ public class ParserGenerator {
      * @param token token passed from initializer
      * @return true if token is 1 char long and contains syntax
      */
-    private boolean findSyntax( String token ) {
+    private boolean isSyntax( String token ) {
         if ( token.length() == 1 ) {
             for ( Syntax temp : Syntax.values() ) {
-                if ( token.charAt( 0 ) == temp.getType() ) {
+                if ( token.charAt( 0 ) == temp.getC() ) {
                     return true;
                 }
             }
@@ -154,38 +168,79 @@ public class ParserGenerator {
     }
 
     /**
-     * Tab append
+     * Adds C for cleaning tokens
+     */
+    private void appendCleanerCode() {
+        C.append( StoredText.CLEANUP.txt() );
+    }
+
+    /**
+     * Adds C for resetting c to x = i
+     */
+    private void appendResetCode() {
+        C.append( "int x = i;\nchar c = text.charAt(x);\n" );
+    }
+
+    /**
+     * Creates string of tabs
      *
-     * @param depth number of tabs
      * @return stacked tabs according to depth
      */
-    private String ta( int depth ) {
+    private String stackTabs( int c ) {
         StringBuilder tab = new StringBuilder();
-        for ( int i = 0; i < depth; i++ ) {
+        for ( int i = 0; i < c; i++ ) {
             tab.append( "\t" );
         }
         return tab.toString();
     }
 
     /**
-     * Adds code for cleaning tokens
+     * Calculates depth. Dont even try to look at it. It will just hurt.
+     *
+     * @return current depth
      */
-    private void addCleanerCode() {
-        code.append( String.format( "%s}\n\n", ta( 1 ) ) );
-        code.append( String.format( "%sList cleanTokens = new ArrayList<String>();\n", ta( 1 ) ) );
-        code.append( String.format( "%sfor ( String s : tokens ) {\n", ta( 1 ) ) );
-        code.append( String.format( "%sif ( s != null && s.length() > 0 ) {\n", ta( 2 ) ) );
-        code.append( String.format( "%scleanTokens.add( s );\n", ta( 3 ) ) );
-        code.append( String.format( "%s}\n", ta( 2 ) ) );
-        code.append( String.format( "%s}\n", ta( 1 ) ) );
-        code.append( String.format( "%sreturn cleanTokens;\n", ta( 1 ) ) );
-        code.append( "}" );
+    private int calculateDepth( String s ) {
+        int depth = 0;
+        boolean specialMod = true;
+        for ( int i = s.length() - 1; i >= 0; i-- ) {
+            if ( s.charAt( i ) == '{' ) {
+                depth++;
+            } else if ( s.charAt( i ) == '}' ) {
+                if ( specialMod ) {
+                    depth -= 2;
+                } else {
+                    depth--;
+                }
+                specialMod = false;
+            } else if ( s.charAt( i ) == ':' ) {
+                depth++;
+            } else if ( i - 6 >= 0 ) {
+                if ( s.substring( i - 6, i ).equals( "break;" ) ) {
+                    if ( specialMod ) {
+                        depth -= 2;
+                    } else {
+                        depth--;
+                    }
+                    specialMod = false;
+                }
+            }
+        }
+
+        return depth;
     }
 
     /**
-     * Adds code for resetting c to x = i
+     * Adds correct whitespace. Do not touch this. I don't want this to go up in flames.
      */
-    private void charReset() {
-        code.append( String.format( "%sint x = i;\n%schar c = text.charAt(x);\n", ta( 2 ), ta( 2 ) ) );
+    private StringBuilder reformatCode( StringBuilder codeToRefactor ) {
+        StringBuilder formattedCode = new StringBuilder();
+        String[] tokens = codeToRefactor.toString().split( "[\n]" );
+
+        for ( String token : tokens ) {
+            String tabs = stackTabs( calculateDepth( formattedCode.toString() ) );
+            formattedCode.append( String.format( "%s%s\n", tabs, token ) );
+        }
+
+        return formattedCode;
     }
 }

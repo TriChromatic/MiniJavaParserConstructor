@@ -17,6 +17,7 @@ public class DelimiterParser {
         String delimiters = delims.replace( "a-z", "abcdefghijklmnopqrstuvwxyz" ); //Replace alphabet abbreviation
         delimiters = delimiters.replace( "A-Z", "abcdefghijklmnopqrstuvwxyz".toUpperCase() );
         delimiters = delimiters.replace( "*S", "\u0020" );
+        delimiters = delimiters.replace( "*N", "\u2424" );
 
         String[] tempTokens = delimiters.split( "[\\[\\]]" ); //Split on brackets and |
         TOKENS = removeNull( tempTokens );

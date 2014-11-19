@@ -11,7 +11,7 @@ public enum Syntax {
         TYPE = c;
     }
 
-    public char getType() {
+    public char getC() {
         return TYPE;
     }
 }

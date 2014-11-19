@@ -5,17 +5,17 @@ public class JPG {
     public static void main( String[] args ) {
         /*Usage for help and checks for proper amounts of arguments*/
         if ( args.length < 1 || args.length > 5 ) {
-            System.out.println( ReadOut.NOPARAM.getText() );
+            System.out.println( StoredText.NOPARAM.txt() );
             return;
         }
 
         if ( args[0].equalsIgnoreCase( "-h" ) || args[0].equalsIgnoreCase( "--help" ) ) {
-            System.out.println( ReadOut.HELP.getText() );
+            System.out.println( StoredText.HELP.txt() );
             return;
         }
 
         /*Argument variables*/
-        boolean returnDelims = false;
+        boolean addCleanerCode = false;
         boolean usingFile = false; //If where using an input file
         boolean outputToFile = false; //If where using an output file
         String delimiters = null;
@@ -25,7 +25,7 @@ public class JPG {
         /*Find arguments*/
         for ( int i = 0; i < args.length; i++ ) {
             if ( args[i].equalsIgnoreCase( "-r" ) ) {
-                returnDelims = true;
+                addCleanerCode = true;
             } else if ( args[i].equalsIgnoreCase( "-f" ) ) {
                 delimFile = new File( args[i + 1] );
                 if ( !delimFile.exists() || !delimFile.canRead() ) {
@@ -49,18 +49,18 @@ public class JPG {
         /*Sets up the handler and parses everything. If there is no output file we just display the code*/
         if ( usingFile ) {
             if ( outputToFile ) {
-                ParseHandler parseGen = new ParseHandler( delimFile, outputFile, returnDelims );
+                ParseHandler parseGen = new ParseHandler( delimFile, outputFile, addCleanerCode );
                 parseGen.writeCode();
             } else {
-                ParseHandler parseGen = new ParseHandler( delimFile, returnDelims );
+                ParseHandler parseGen = new ParseHandler( delimFile, addCleanerCode );
                 parseGen.displayCode();
             }
         } else {
             if ( outputToFile ) {
-                ParseHandler parseGen = new ParseHandler( delimiters, outputFile, returnDelims );
+                ParseHandler parseGen = new ParseHandler( delimiters, outputFile, addCleanerCode );
                 parseGen.writeCode();
             } else {
-                ParseHandler parseGen = new ParseHandler( delimiters, returnDelims );
+                ParseHandler parseGen = new ParseHandler( delimiters, addCleanerCode );
                 parseGen.displayCode();
             }
         }
