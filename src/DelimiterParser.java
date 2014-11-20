@@ -6,7 +6,7 @@ import java.util.List;
  * Created by TriChromatic aka Dylan Eicher on 11/17/14.
  */
 public class DelimiterParser {
-    private final List<String> TOKENS;
+    private final List<Token> TOKENS;
 
     /**
      * Parses and modifys input delims
@@ -14,13 +14,24 @@ public class DelimiterParser {
      * @param delims delimiters to be parsed
      */
     DelimiterParser( String delims ) {
-        String delimiters = delims.replace( "a-z", "abcdefghijklmnopqrstuvwxyz" ); //Replace alphabet abbreviation
+
+        /*replaces certain abbreviations and non-enterable chars*/
+        String delimiters = delims.replace( "a-z", "abcdefghijklmnopqrstuvwxyz" );
         delimiters = delimiters.replace( "A-Z", "abcdefghijklmnopqrstuvwxyz".toUpperCase() );
         delimiters = delimiters.replace( "*S", "\u0020" );
         delimiters = delimiters.replace( "*N", "\u2424" );
 
-        String[] tempTokens = delimiters.split( "[\\[\\]]" ); //Split on brackets and |
-        TOKENS = removeNull( tempTokens );
+        String[] tempTokens = delimiters.split( "((?<=[\\[\\]])|(?=[\\[\\]]))" ); //Split on brackets
+
+        /*VERY important generate parsetree step.*/
+        TOKENS = generateParseTree( removeNull( tempTokens ) );
+    }
+
+    /**
+     * @return tokens
+     */
+    public List<Token> getTokens() {
+        return new ArrayList<>( TOKENS );
     }
 
     /**
@@ -38,9 +49,43 @@ public class DelimiterParser {
     }
 
     /**
-     * @return tokens
+     * Generates parse treeish thing.
+     *
+     * @param tokens tokens
+     * @return parse tree
      */
-    public List<String> getTokens() {
-        return new ArrayList<>( TOKENS );
+    private List<Token> generateParseTree( List<String> tokens ) {
+        boolean open = false;
+        List<Token> sortedParse = new ArrayList<>();
+
+        /*Flow open and close delims*/
+        final String FLOW_OPEN = "[";
+        final String FLOW_CLOSE = "]";
+
+        /*Loops through the tokens and creates tokens based on whether they are syntax or not*/
+        for ( String token : tokens ) {
+            switch ( token ) {
+                case FLOW_OPEN:
+                    open = true;
+                    break;
+                case FLOW_CLOSE:
+                    open = false;
+                    break;
+                default:
+                    if ( open ) {
+                        sortedParse.add( new Token( token, true ) );
+                    } else {
+                        for ( int j = 0; j < token.length(); j++ ) {
+                            String convert = Character.toString( token.charAt( j ) );
+                            if ( Syntax.isSyntax( convert ) ) {
+                                sortedParse.add( new Token( convert, false ) );
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return sortedParse;
     }
 }

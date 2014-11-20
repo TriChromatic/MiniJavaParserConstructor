@@ -3,11 +3,11 @@
  * Created by TriChromatic aka Dylan Eicher on 11/18/14.
  */
 public enum Syntax {
-    BIND( '.' ), NOT( '^' ), START( '-' ), END( '+' ), AND( '&' ), OR( '%' );
+    BIND( '.' ), NOT( '^' ), START( '-' ), END( '+' ), AND( '&' ), OR( '%' ), NULL( 'N' );
 
     private final char SYNTAX;
 
-    private Syntax( char c ) {
+    Syntax( char c ) {
         SYNTAX = c;
     }
 

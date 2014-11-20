@@ -23,11 +23,12 @@ public class ParserGenerator {
      * @param tokens     tokens to build parser from
      * @param removeNull true if adding code to remove null tokens
      */
-    ParserGenerator( List<String> tokens, boolean removeNull ) {
+    ParserGenerator( List<Token> tokens, boolean removeNull ) {
+
         /*Create StringBuilder with proper starting things and store tokens. If the whole thing is wrapped with
         * a start or end char, we use an initializer with no for loop.*/
-        if ( tokens.get( tokens.size() - 1 ).charAt( 0 ) != Syntax.END.getC()
-                && tokens.get( tokens.size() - 1 ).charAt( 0 ) != Syntax.START.getC() ) {
+        if ( tokens.get( tokens.size() - 1 ).content().charAt( 0 ) != Syntax.END.getC()
+                && tokens.get( tokens.size() - 1 ).content().charAt( 0 ) != Syntax.START.getC() ) {
             C = new StringBuilder( StoredCode.INITIAL_FOR.code() + StoredCode.INITIAL_X.code()
                     + StoredCode.INITIAL_C.code() + StoredCode.INITIAL_MOD.code() );
             usingFor = true;
@@ -45,25 +46,25 @@ public class ParserGenerator {
         int bindMod = 0; //Number of bind statements
         int bindIndex = 0; //Index of first bind statement
 
+
         for ( int i = 0; i < tokens.size(); i++ ) {
 
             /*Safe token finding. Token is declared final for safety*/
-            final String token = tokens.get( i );
-            final char startC = token.charAt( 0 );
+            final Token token = tokens.get( i );
 
             /*Forward token must only be non syntax related*/
-            String forwardToken = "";
+            Token forwardToken = new Token( "", true );
             if ( i < tokens.size() - 1 ) {
                 for ( int x = i + 1; x < tokens.size(); x++ ) {
                     forwardToken = tokens.get( x );
-                    if ( !Syntax.isSyntax( forwardToken ) ) {
+                    if ( forwardToken.isToken() ) {
                         break;
                     }
                 }
             }
 
             /*If its not a syntax token, then we generate the switch case statements*/
-            if ( !Syntax.isSyntax( token ) ) {
+            if ( token.isToken() ) {
 
                 /*Reset x and c, set indexes*/
                 appendResetCode();
@@ -73,8 +74,8 @@ public class ParserGenerator {
                 /*If we use a ^ this is what we do use the not eq and and*/
                 C.append( StoredCode.SWITCH_START.code() );
 
-                for ( int j = 0; j < token.length(); j++ ) {
-                    C.append( String.format( StoredCode.CASE.code(), (int) token.charAt( j ) ) );
+                for ( int j = 0; j < token.content().length(); j++ ) {
+                    C.append( String.format( StoredCode.CASE.code(), (int) token.content().charAt( j ) ) );
                     if ( isEq( eq ) ) {
                         C.append( StoredCode.INDEXOF.code() );
                     }
@@ -94,20 +95,20 @@ public class ParserGenerator {
                 ao = "||";
 
             } else {
-                if ( startC == Syntax.END.getC() ) {
+                if ( token.getMySyntax().equals( Syntax.END ) ) {
 
                     /*Account for ending notation*/
                     C.insert( tokenIndex, StoredCode.END_X.code()
                             + StoredCode.RESET_C.code() );
                     tokenIndex = C.length();
 
-                } else if ( startC == Syntax.START.getC() ) {
+                } else if ( token.getMySyntax().equals( Syntax.START ) ) {
 
                     /*Account for starting notation*/
                     C.insert( tokenIndex, StoredCode.START_X.code() + StoredCode.RESET_C.code() );
                     tokenIndex = C.length();
 
-                } else if ( startC == Syntax.BIND.getC() ) {
+                } else if ( token.getMySyntax().equals( Syntax.BIND ) ) {
 
                     /*Set bind index. Also increment bindMod.*/
                     bindIndex = swSIndex;
@@ -122,16 +123,16 @@ public class ParserGenerator {
                     int nextInsert = swSIndex + ( C.length() - beforeInsert );
 
                     /*Use forward token and insert the statement into the correct position*/
-                    for ( int j = 0; j < forwardToken.length(); j++ ) {
+                    for ( int j = 0; j < forwardToken.content().length(); j++ ) {
                         beforeInsert = C.length();
 
                         /*Checks to see if its the last statement or not*/
-                        if ( j < forwardToken.length() - 1 ) {
+                        if ( j < forwardToken.content().length() - 1 ) {
                             C.insert( nextInsert, String.format( StoredCode.IF_FORMAT.code(),
-                                    eq, (int) forwardToken.charAt( j ), ao ) );
+                                    eq, (int) forwardToken.content().charAt( j ), ao ) );
                         } else {
                             C.insert( nextInsert, String.format( StoredCode.IF_FORMAT_NO_AO.code(),
-                                    eq, (int) forwardToken.charAt( j ) ) );
+                                    eq, (int) forwardToken.content().charAt( j ) ) );
                         }
                         nextInsert = nextInsert + ( C.length() - beforeInsert );
                     }
@@ -144,11 +145,11 @@ public class ParserGenerator {
 
                     tokens.remove( forwardToken );
 
-                } else if ( startC == Syntax.NOT.getC() ) {
+                } else if ( token.getMySyntax().equals( Syntax.NOT ) ) {
                     eq = "!=";
-                } else if ( startC == Syntax.AND.getC() ) {
+                } else if ( token.getMySyntax().equals( Syntax.AND ) ) {
                     ao = "&&";
-                } else if ( startC == Syntax.OR.getC() ) {
+                } else if ( token.getMySyntax().equals( Syntax.OR ) ) {
 
                     /*Insert Safety Code*/
                     insertSafetyCode( bindIndex, bindMod );
@@ -240,7 +241,7 @@ public class ParserGenerator {
     }
 
     /**
-     * Calculates depth.
+     * Calculates depth but also takes a token to add to it. Useful for the final depth calculation.
      *
      * @param s     String to calculate depth of.
      * @param token Current token
