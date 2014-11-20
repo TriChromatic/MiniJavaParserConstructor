@@ -30,7 +30,7 @@ public enum StoredCode {
     INDEXOF( "tokens.add(text.substring(index, x));\nindex = x + 1 + mod;\n" ),
 
     /*Ending statements*/
-    END_START( "){\n" ),
+    END_START( ") {\n" ),
     END( "}\n" ),
 
     /*Index / x modification*/
@@ -39,20 +39,23 @@ public enum StoredCode {
     LOOK_BEHIND( "x = x - 1;\n" ),
 
     /*If code*/
-    IF_FORMAT( "c%s'%s'%s" ),
-    IF_FORMAT_NO_AO( "c%s'%s'" ),
+    IF_FORMAT( "c%s%s%s" ),
+    IF_FORMAT_NO_AO( "c%s%s" ),
     IF_START( "if(" ),
 
     /*Switch code*/
     SWITCH_START( "switch(c) {\n" ),
-    CASE( "case '%s':\n" ),
+    CASE( "case %s:\n" ),
     DEFAULT( "default :\n" ),
     BREAK( "break;\n" ),
 
     /*Modify code*/
     INITIAL_MOD( "int mod = 0;\n" ),
     INC_MOD( "mod++;\n" ),
-    RESET_MOD( "mod = 0;\n" );
+    RESET_MOD( "mod = 0;\n" ),
+
+    /*Safety Code*/
+    IF_CHECK( "if(x - %s >= 0) {\n" );
 
     private final String CODE;
 

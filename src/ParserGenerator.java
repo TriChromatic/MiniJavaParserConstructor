@@ -42,6 +42,8 @@ public class ParserGenerator {
         String ao = "||"; //Switches between && and ||, Defaults to ||
         int tokenIndex = C.length(); //Beginning index where token stuff should start
         int swSIndex = C.length(); //Beginning index where the last switch run was conducted
+        int bindMod = 0; //Number of bind statements
+        int bindIndex = 0; //Index of first bind statement
 
         for ( int i = 0; i < tokens.size(); i++ ) {
 
@@ -72,7 +74,7 @@ public class ParserGenerator {
                 C.append( StoredCode.SWITCH_START.code() );
 
                 for ( int j = 0; j < token.length(); j++ ) {
-                    C.append( String.format( StoredCode.CASE.code(), token.charAt( j ) ) );
+                    C.append( String.format( StoredCode.CASE.code(), (int) token.charAt( j ) ) );
                     if ( isEq( eq ) ) {
                         C.append( StoredCode.INDEXOF.code() );
                     }
@@ -107,11 +109,15 @@ public class ParserGenerator {
 
                 } else if ( startC == Syntax.BIND.getC() ) {
 
+                    /*Set bind index. Also increment bindMod.*/
+                    bindIndex = swSIndex;
+                    bindMod++;
+
                     /*Injects if statements into proper index*/
                     int beforeInsert = C.length();
                     C.insert( swSIndex, StoredCode.IF_START.code() );
 
-                    /*Next insert is calculated by taking the number of charecters just inserted and adding it
+                    /*Next insert is calculated by taking the number of characters just inserted and adding it
                     * to the previous index point to find the next place the code should be inserted.*/
                     int nextInsert = swSIndex + ( C.length() - beforeInsert );
 
@@ -122,10 +128,10 @@ public class ParserGenerator {
                         /*Checks to see if its the last statement or not*/
                         if ( j < forwardToken.length() - 1 ) {
                             C.insert( nextInsert, String.format( StoredCode.IF_FORMAT.code(),
-                                    eq, forwardToken.charAt( j ), ao ) );
+                                    eq, (int) forwardToken.charAt( j ), ao ) );
                         } else {
                             C.insert( nextInsert, String.format( StoredCode.IF_FORMAT_NO_AO.code(),
-                                    eq, forwardToken.charAt( j ) ) );
+                                    eq, (int) forwardToken.charAt( j ) ) );
                         }
                         nextInsert = nextInsert + ( C.length() - beforeInsert );
                     }
@@ -144,6 +150,9 @@ public class ParserGenerator {
                     ao = "&&";
                 } else if ( startC == Syntax.OR.getC() ) {
 
+                    /*Insert Safety Code*/
+                    insertSafetyCode( bindIndex, bindMod );
+
                     /*Finish if / switch by appending braces*/
                     diveMaster( 2 );
 
@@ -151,9 +160,14 @@ public class ParserGenerator {
                     C.append( StoredCode.RESET_MOD.code() );
                     eq = "==";
                     ao = "||";
+                    bindIndex = 0;
+                    bindMod = 0;
                 }
             }
         }
+
+        /*Insert Safety Code*/
+        insertSafetyCode( bindIndex, bindMod );
 
         /*Append braces if needed*/
         diveMaster( 1 );
@@ -190,6 +204,18 @@ public class ParserGenerator {
     }
 
     /**
+     * Inserts bindIndex into a proper index as long as bind index has been set
+     *
+     * @param bindIndex index to insert at
+     * @param bindMod   >= modify
+     */
+    private void insertSafetyCode( int bindIndex, int bindMod ) {
+        if ( bindIndex != 0 ) {
+            C.insert( bindIndex, String.format( StoredCode.IF_CHECK.code(), bindMod ) );
+        }
+    }
+
+    /**
      * Adds brackets till specified depth has been reached.
      *
      * @param depth rig for dive!
@@ -222,7 +248,7 @@ public class ParserGenerator {
      */
     private int calculateDepth( String s, String token ) {
         int depthN = s.split( "[}]|(break;)" ).length;
-        int depthP = s.split( "[{]|(':)|(default :)" ).length;
+        int depthP = s.split( "[{]|(case)|(default :)" ).length;
         int depth = depthP - depthN;
 
         if ( token.matches( "}" ) ) {
@@ -240,7 +266,7 @@ public class ParserGenerator {
      */
     private int calculateDepth( String s ) {
         int depthN = s.split( "[}]|(break;)" ).length;
-        int depthP = s.split( "[{]|(':)|(default :)" ).length;
+        int depthP = s.split( "[{]|(case)|(default :)" ).length;
 
         return depthP - depthN;
     }
