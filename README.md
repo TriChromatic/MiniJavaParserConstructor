@@ -20,9 +20,9 @@ All generated code is easy to change due to using enums that store strings. Synt
 Latest updates added a Token object instead of a normal string being used as a token which has allowed for greater flexabilty, and now, there is a flow control method. The flow control method lets all things opened by `[` be considered tokens and not syntax. It also must be closed by `]`. This allows for chars that are normaly delimiters to be considered tokens and also allows for the ability to have long strings of delimiters eg. `[h]-^.[i]`.
 
 Delimiters Main:
-`.` is bind, basically a look behind eg. `[h].[i]` means an h one char behind an i.
-`%` is reset, which resets everything and starts without previous delimiters / options. It is also possible to use as an AND / OR.
-`^` is not, eg. changes tokenize at `a-z` to tokenize at anything not `a-z`.
-`+` split only at the end
-`-` split only at the start
+*`.` is bind, basically a look behind eg. `[h].[i]` means an h one char behind an i.
+*`%` is reset, which resets everything and starts without previous delimiters / options. It is also possible to use as an AND / OR.
+*`^` is not, eg. changes tokenize at `a-z` to tokenize at anything not `a-z`.
+*`+` split only at the end
+*`-` split only at the start
 
