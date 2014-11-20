@@ -15,21 +15,11 @@ public enum StoredText {
             "java JPG -r will add in code to remove null / blank tokens\n" +
             "\n" +
             "For help:\n" +
-            "java JPG -h || java JPG --help" ),
-    INITIALFOR( "List<String> parseText(String text) {\n" +
-            "List<String> tokens = new ArrayList<String>();\n" +
-            "int index = 0;\nfor(int i = 0; i < text.length(); i++) {\n" ),
-    CLEANUP( "ArrayList<String> cleanTokens = new ArrayList<>();\n" +
-            "for ( String s : tokens ) {\n" +
-            "if ( s != null && s.length() > 0 ) {\n" +
-            "cleanTokens.add( s );\n" +
-            "}\n" +
-            "}\n" +
-            "return cleanTokens" );
+            "java JPG -h || java JPG --help" );
 
     private final String TEXT;
 
-    StoredText( String s ) {
+    private StoredText( String s ) {
         TEXT = s;
     }
 
