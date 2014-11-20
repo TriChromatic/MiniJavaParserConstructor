@@ -15,7 +15,8 @@ public enum StoredText {
             "java JPG -r will add in code to remove null / blank tokens\n" +
             "\n" +
             "For help:\n" +
-            "java JPG -h || java JPG --help" );
+            "java JPG -h || java JPG --help" ),
+    TOKEN_WARNING( "Warning! Token: '%s' is invalid. Token was discarded." );
 
     private final String TEXT;
 
