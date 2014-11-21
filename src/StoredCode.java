@@ -27,7 +27,7 @@ public enum StoredCode {
     RESET_X( "x = i;\n" ),
 
     /*Grabs the token, adds it to the list, sets index forward*/
-    INDEXOF( "tokens.add(text.substring(index, x));\nindex = x + 1 + mod;\n" ),
+    INDEXOF( "tokens.add(text.substring(index, x));\nindex = x + 1 + mod;\ni = index;\n" ),
 
     /*Ending statements*/
     END_START( ") {\n" ),
