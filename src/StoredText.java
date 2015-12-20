@@ -3,19 +3,18 @@
  * Created by TriChromatic aka Dylan Eicher on 11/18/14.
  */
 public enum StoredText {
-    HELP( "Surround delimiters with [] to mean any within.\n" +
-            "[].[] Means next to each other eg. [aeiouy].[e] is any vowel next to e.\n" +
-            "^ Denotes not eg. ^[a] would mean anything that's not 'a'.\n" +
-            "-[] means in front of a string. eg. string say hello parsed with [h]- would parse to [say ][ello].\n" +
-            "[]+ is the same thing but means ending.\n" +
-            "You can wrap eg. [[aeiouy].[e]]+ means any vowel next to e at the end of string." ),
-    NOPARAM( "Example Usage:\n" +
+    NOPARAM( "Try '-h' or '--help'\nVisit TriChromaticStudios.com for a full syntex and technical overview!\n" ),
+    HELP( "Example Usage:\n" +
             "java JPG -d delims -o output.txt\n" +
-            "java JPG -f delimsfile.txt output.txt\n" +
-            "java JPG -r will add in code to remove null / blank tokens\n" +
+            "java JPG -f delimsfile.txt -o output.txt\n" +
+            "java JPG -r\n" +
+            "sanataizes all whitespace from delims\n" +
+            "java JPG -rf\n" +
+            "sanataizes all whitespace from file pre-parsing\n" +
+            "java JPG -rmf\n" +
+            "sanatizes all whitespace before parsing except for newlines\n" +
             "\n" +
-            "For help:\n" +
-            "java JPG -h || java JPG --help" ),
+            "For much more indepth help visit TriChromaticStudios.com\n\n");
     TOKEN_WARNING( "Warning! Token: '%s' is invalid. Token was discarded." );
 
     private final String TEXT;
