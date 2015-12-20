@@ -17,7 +17,8 @@ public enum StoredCode {
             "}\n" ),
     INITIAL_NO_FOR( "List<String> parseText(String text) {\n" +
             "List<String> tokens = new ArrayList<String>();\n" +
-            "int index = 0;\n" ),
+            "int index = 0;\n" + 
+            "int i = 0;\n"),
     RETURN_TOKENS( "return tokens;\n}\n" ),
 
     /*x and c initializer and reset code*/
